@@ -5,28 +5,7 @@ from tkinter import filedialog
 from PIL import ImageTk, Image
 import os
 
-# # Initializing path of the tesseract and path of the cascade xml
-# pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-# plate_cascade = cv2.CascadeClassifier('C:/Users/asus/Desktop/PSW/haarcascade_russian_plate_number.xml')
-#
-# img = cv2.imread('test.jpg')
-# height, width, _ = img.shape
-# gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-#
-# plates = plate_cascade.detectMultiScale(gray, 1.2, 10)
-# print(plates)
-#
-# blured_img = cv2.GaussianBlur(img, (15, 15), 0)
-# for (x, y, w, h) in plates:
-#     cv2.rectangle(img, (x, y), (x+w, y+h), (237, 227, 26), 2)
-#     # inserting detected region on the blured image
-#     blured_img[y:y+h, x:x+w] = img[y:y+h, x:x+w]
-#     text = pytesseract.image_to_string(blured_img[y:y+h, x:x+w])
-#     cv2.putText(blured_img, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (237, 227, 26), 2)
-#
-# cv2.imshow('Detection', blured_img)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
+
 
 filename_xml = ""
 filename_image = ""
@@ -39,8 +18,9 @@ def search_xml():
     global filename_xml
     filename_xml = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(("xml files", "*.xml"),
                                                                                           ("all files", "*.*")))
+    text_variable_xml.set(os.path.basename(filename_xml))
 
-    print(filename_image)
+    print(filename_xml)
 
 def search_image():
     global filename_image
@@ -68,6 +48,47 @@ def search_image():
     canv1.image = photo
 
 
+def find_plate():
+    global filename_xml, filename_image
+    # Initializing path of the tesseract and path of the cascade xml
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    plate_cascade = cv2.CascadeClassifier(filename_xml)
+
+    img = cv2.imread(filename_image)
+    height, width, _ = img.shape
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    plates = plate_cascade.detectMultiScale(gray, 1.2, 10)
+    print(plates)
+
+    blured_img = cv2.GaussianBlur(img, (15, 15), 0)
+    for (x, y, w, h) in plates:
+        cv2.rectangle(img, (x, y), (x + w, y + h), (237, 227, 26), 2)
+        # inserting detected region on the blured image
+        blured_img[y:y + h, x:x + w] = img[y:y + h, x:x + w]
+        text = pytesseract.image_to_string(blured_img[y:y + h, x:x + w])
+        cv2.putText(blured_img, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (237, 227, 26), 2)
+
+    image_PIL = Image.fromarray(cv2.cvtColor(blured_img, cv2.COLOR_BGR2RGB))
+
+    new_height = 350
+    new_width = int(width * new_height / height)
+
+    image_PIL = image_PIL.resize((new_width, new_height))
+
+    photo = ImageTk.PhotoImage(image_PIL)
+    start_x = 0
+    if new_width < 700:
+        start_x = int((700 - new_width) / 2)
+
+    canv2.create_image(start_x, 0, anchor="nw", image=photo)
+    canv2.image = photo
+
+
+
+    cv2.imshow('Detection', blured_img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 window = tk.Tk()
@@ -103,6 +124,11 @@ search_btn_image.grid(row=3, column=1, stick="nwe", padx=5)
 image_label = tk.Label(window, textvariable=text_variable_image, font=("Arial", 10))
 image_label.grid(row=4, column=1, stick="nwe", padx=5)
 
+
+tk.Label(window, text="--Detection--", font=("Arial", 30)).grid(row=6, column=1, stick="nwe", padx=5)
+
+detect_btn = tk.Button(window, text="Find plate", font="Arial", command=find_plate)
+detect_btn.grid(row=7, column=1, stick="nwe", padx=5)
 
 
 canv1 = tk.Canvas(window, width=700, height=350, bg='white')
