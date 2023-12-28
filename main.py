@@ -1,28 +1,33 @@
-# import cv2
-#
-# test = cv2.imread('test.jpg')
-# gray_test = cv2.cvtColor(test, cv2.COLOR_BGR2GRAY)
-# haar_plate = cv2.CascadeClassifier('PlateDetector.xml')
-# detected_plate = haar_plate.detectMultiScale(gray_test, scaleFactor=1.1, minNeighbors=5)
-#
-# for (x,y,w,h) in detected_plate:
-#     cv2.rectangle(gray_test, (x,y), (x+2, y+h), (250, 150, 50), 10)
-#
-# cv2.imshow(gray_test)
-
 import numpy as np
 import cv2
 
-face_cascade = cv2.CascadeClassifier('C:/Users/asus/Downloads/haarcascade_russian_plate_number.xml')
+plate_cascade = cv2.CascadeClassifier('C:/Users/asus/Desktop/PSW/haarcascade_russian_plate_number.xml')
+
 img = cv2.imread('test.jpg')
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-faces = face_cascade.detectMultiScale(gray, 1.1, 1)
-print(faces)
-for (x, y, w, h) in faces:
-    cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+height, width, _ = img.shape
 
 
-cv2.imshow('img', img)
+plates = plate_cascade.detectMultiScale(gray, 1.2, 10)
+print(plates)
+for (x, y, w, h) in plates:
+    cv2.rectangle(img, (x, y), (x + w, y + h), (237, 227, 26), 2)
+
+
+    roi_mask = np.zeros((height, width), dtype=np.uint8)
+    roi_mask[y:y + h, x:x + w] = 255
+    outside_roi_mask = cv2.bitwise_not(roi_mask)
+
+    # Utwórz obraz poza ROI
+    outside_roi_image = cv2.bitwise_and(img, img, mask=outside_roi_mask)
+
+    blurred_roi = cv2.GaussianBlur(outside_roi_image, (15, 15), 0)
+
+    blurred_roi[y:y + h, x:x + w] = img[y:y + h, x:x + w]
+
+    cv2.imshow('img', blurred_roi)
+
+
 cv2.waitKey(0)
 cv2.destroyAllWindows()
