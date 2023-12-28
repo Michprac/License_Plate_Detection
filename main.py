@@ -5,13 +5,9 @@ from tkinter import filedialog
 from PIL import ImageTk, Image
 import os
 
-
-
+# Variables for storing paths of the cascade xml and image for detection
 filename_xml = ""
 filename_image = ""
-
-
-
 
 
 def search_xml():
@@ -19,8 +15,8 @@ def search_xml():
     filename_xml = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=(("xml files", "*.xml"),
                                                                                           ("all files", "*.*")))
     text_variable_xml.set(os.path.basename(filename_xml))
-
-    print(filename_xml)
+    if filename_xml:
+        xml_label.config(fg="green")
 
 def search_image():
     global filename_image
@@ -29,6 +25,9 @@ def search_image():
                                                                                         ("png files", "*.png"),
                                                                                         ("all files", "*.*")))
     image = Image.open(filename_image)
+
+    if image:
+        image_label.config(fg="green")
     # Show with label what image have you picked
     text_variable_image.set(os.path.basename(image.filename))
 
@@ -58,8 +57,11 @@ def find_plate():
     height, width, _ = img.shape
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    plates = plate_cascade.detectMultiScale(gray, 1.2, 10)
-    print(plates)
+    plates = plate_cascade.detectMultiScale(gray,
+                                            float(text_variable_scale_factor.get()),
+                                            int(text_variable_min_neigh.get())
+                                            )
+    # print(plates)
 
     blured_img = cv2.GaussianBlur(img, (15, 15), 0)
     for (x, y, w, h) in plates:
@@ -94,11 +96,13 @@ def find_plate():
 window = tk.Tk()
 
 text_variable_image = tk.StringVar(value="choose image")
-
 text_variable_xml = tk.StringVar(value="choose xml")
 
+text_variable_scale_factor = tk.StringVar(value="1.2")
+text_variable_min_neigh = tk.StringVar(value="10")
+
 window_height = 750
-window_width = 1000
+window_width = 970
 d_x = 100
 d_y = 50
 
@@ -115,14 +119,15 @@ tk.Label(window, text="--FILES--", font=("Arial", 30)).grid(row=0, column=1, sti
 search_btn_xml = tk.Button(window, text="Open cascade", font="Arial", command=search_xml)
 search_btn_xml.grid(row=1, column=1, stick="nwe", padx=5)
 
-xml_label = tk.Label(window, textvariable=text_variable_xml, font=("Arial", 10))
+xml_label = tk.Label(window, textvariable=text_variable_xml, font=("Arial", 10), fg="red")
 xml_label.grid(row=2, column=1, stick="nwe", padx=5)
 
 search_btn_image = tk.Button(window, text="Open image", font="Arial", command=search_image)
 search_btn_image.grid(row=3, column=1, stick="nwe", padx=5)
 
-image_label = tk.Label(window, textvariable=text_variable_image, font=("Arial", 10))
+image_label = tk.Label(window, textvariable=text_variable_image, font=("Arial", 10), fg="red")
 image_label.grid(row=4, column=1, stick="nwe", padx=5)
+
 
 
 tk.Label(window, text="--Detection--", font=("Arial", 30)).grid(row=6, column=1, stick="nwe", padx=5)
@@ -130,12 +135,20 @@ tk.Label(window, text="--Detection--", font=("Arial", 30)).grid(row=6, column=1,
 detect_btn = tk.Button(window, text="Find plate", font="Arial", command=find_plate)
 detect_btn.grid(row=7, column=1, stick="nwe", padx=5)
 
+tk.Label(window, text="Scale Factor:", font=("Arial", 15)).grid(row=8, column=1, stick="nwe", padx=5)
+entry_scale_factor = tk.Entry(window, font=("Arial", 10, 'normal'), textvariable=text_variable_scale_factor)
+entry_scale_factor.grid(row=9, column=1, stick="nwe", padx=5)
+
+tk.Label(window, text="Min Neighbours:", font=("Arial", 15)).grid(row=10, column=1, stick="nwe", padx=5)
+entry_min_neigh = tk.Entry(window, font=("Arial", 10, 'normal'), textvariable=text_variable_min_neigh)
+entry_min_neigh.grid(row=11, column=1, stick="nwe", padx=5)
+
 
 canv1 = tk.Canvas(window, width=700, height=350, bg='white')
 canv1.grid(row=0, column=0, rowspan=5, stick="n")
 
 canv2 = tk.Canvas(window, width=700, height=350, bg='white')
-canv2.grid(row=6, column=0, rowspan=5, pady=25, stick="n")
+canv2.grid(row=6, column=0, rowspan=6, pady=25, stick="n")
 
 
 
