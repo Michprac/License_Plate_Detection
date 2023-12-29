@@ -10,3 +10,7 @@ This application serves two main functions:
 
 # The preview of the application while working
 
+<p float="left">
+  <img src ="/images/main_screen.png" width="200" >
+  <img src ="/images/process_screen.png" width="200" >
+</p>
