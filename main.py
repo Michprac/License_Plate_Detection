@@ -68,7 +68,7 @@ def find_plate():
         cv2.rectangle(img, (x, y), (x + w, y + h), (237, 227, 26), 2)
         # inserting detected region on the blured image
         blured_img[y:y + h, x:x + w] = img[y:y + h, x:x + w]
-        text = pytesseract.image_to_string(blured_img[y:y + h, x:x + w])
+        text = pytesseract.image_to_string(img[y:y + h, x:x + w])
         cv2.putText(blured_img, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (237, 227, 26), 2)
 
     image_PIL = Image.fromarray(cv2.cvtColor(blured_img, cv2.COLOR_BGR2RGB))
