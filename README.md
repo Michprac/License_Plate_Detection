@@ -11,8 +11,8 @@ This application serves two main functions:
 # The preview of the application while working
 
 <p align = "center">
-  <img src ="/images/main_screen.png" width="420">
-  <img src ="/images/process_screen.png" width="420" >
+  <img src ="/images/main_screen.png" width="400">
+  <img src ="/images/process_screen.png" width="400" >
 </p>
 
 On the images above you can see two sample photos that show the application: immediately after launch and during sample detection (test photo taken from the Internet).
